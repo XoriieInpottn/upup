@@ -13,10 +13,11 @@ if __name__ == '__main__':
         ],
         entry_points={
             'console_scripts': [
-                'upup = upup.main:main'
+                'upup = upup.main:main',
+                'za = upup.main:main'
             ]
         },
-        version='1.0',
+        version='2.0',
         description='A terminal tool to upload files to servers based on SSH.',
         long_description_content_type='text/markdown',
         long_description=long_description,
@@ -31,5 +32,8 @@ if __name__ == '__main__':
             'Programming Language :: Python :: 3.8',
         ],
         include_package_data=True,
-        zip_safe=True
+        zip_safe=True,
+        install_requires=[
+            'paramiko'
+        ]
     )
