@@ -63,6 +63,10 @@ class Uploader(object):
             print(f' ERROR\t{path} is not in the project directory.', file=sys.stderr)
             return
 
+        if os.path.islink(path) and self.ignore_link:
+            print(f'IGNORE\t{path}')
+            return
+
         if os.path.isdir(path):
             self._upload_dir(path)
         else:
@@ -73,12 +77,9 @@ class Uploader(object):
         remote_dir_path = os.path.join(self.remote_dir, os.path.relpath(local_dir_path, self.local_dir))
         self._exec(f'mkdir -p {self._escape(remote_dir_path)}')
 
-        if os.path.islink(path) and self.ignore_link:
-            print(f'IGNORE\t{path}')
-        else:
-            remote_file_path = os.path.join(remote_dir_path, os.path.basename(path))
-            print(f'UPLOAD\t{path}\t->\t{remote_file_path}')
-            self.sftp.put(path, remote_file_path)
+        remote_file_path = os.path.join(remote_dir_path, os.path.basename(path))
+        print(f'UPLOAD\t{path}\t->\t{remote_file_path}')
+        self.sftp.put(path, remote_file_path)
 
     def _upload_dir(self, path: str):
         for local_dir_path, _, filenames in os.walk(path):
