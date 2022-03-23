@@ -74,7 +74,8 @@ class Uploader(object):
 
     def _upload_file(self, path: str):
         local_dir_path = os.path.dirname(path)
-        remote_dir_path = os.path.join(self.remote_dir, os.path.relpath(local_dir_path, self.local_dir))
+        rel_dir_path = os.path.relpath(local_dir_path, self.local_dir)
+        remote_dir_path = os.path.join(self.remote_dir, rel_dir_path) if rel_dir_path != '.' else self.remote_dir
         self._exec(f'mkdir -p {self._escape(remote_dir_path)}')
 
         remote_file_path = os.path.join(remote_dir_path, os.path.basename(path))
@@ -83,7 +84,8 @@ class Uploader(object):
 
     def _upload_dir(self, path: str):
         for local_dir_path, _, filenames in os.walk(path):
-            remote_dir_path = os.path.join(self.remote_dir, os.path.relpath(local_dir_path, self.local_dir))
+            rel_dir_path = os.path.relpath(local_dir_path, self.local_dir)
+            remote_dir_path = os.path.join(self.remote_dir, rel_dir_path) if rel_dir_path != '.' else self.remote_dir
             print(f'CREATE\t{remote_dir_path}')
             self._exec(f'mkdir -p {self._escape(remote_dir_path)}')
 

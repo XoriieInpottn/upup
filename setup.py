@@ -17,7 +17,7 @@ if __name__ == '__main__':
                 'za = upup.main:main'
             ]
         },
-        version='2.2',
+        version='2.3',
         description='A terminal tool to upload files to servers based on SSH.',
         long_description_content_type='text/markdown',
         long_description=long_description,
