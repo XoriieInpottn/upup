@@ -12,6 +12,8 @@ import sys
 from typing import List
 
 from paramiko.client import SSHClient, AutoAddPolicy
+from paramiko.config import SSHConfig
+from paramiko.proxy import ProxyCommand
 
 CONF_FILE = '.upup.conf'
 
@@ -35,13 +37,40 @@ class Uploader(object):
         self.remote_dir = remote_dir
         self.ignore_link = ignore_link
 
-        self.ssh = SSHClient()
-        self.ssh.set_missing_host_key_policy(AutoAddPolicy)
-        self.ssh.connect(self.host, self.port, self.user, look_for_keys=True)
-        self.sftp = self.ssh.open_sftp()
+        self._open()
 
         self._exec(f'mkdir -p {self._escape(self.remote_dir)}')
         self.remote_dir = self._exec(f'cd {self._escape(self.remote_dir)}; pwd').strip()
+
+    def _open(self):
+        self.ssh = SSHClient()
+        self.ssh.set_missing_host_key_policy(AutoAddPolicy)
+
+        kwargs = {
+            'hostname': self.host,
+            'port': self.port,
+            'username': self.user,
+            'look_for_keys': True
+        }
+
+        conf_file = os.path.expanduser('/etc/ssh/ssh_config')
+        if os.path.exists(conf_file):
+            ssh_config = SSHConfig()
+            with open(conf_file, 'rt', encoding='utf-8') as f:
+                ssh_config.parse(f)
+            host_conf = ssh_config.lookup(self.host)
+            if host_conf:
+                if 'proxycommand' in host_conf:
+                    kwargs['sock'] = ProxyCommand(host_conf['proxycommand'])
+                if 'user' in host_conf:
+                    kwargs['username'] = host_conf['user']
+                if 'identityfile' in host_conf:
+                    kwargs['key_filename'] = host_conf['identityfile']
+                if 'hostname' in host_conf:
+                    kwargs['hostname'] = host_conf['hostname']
+
+        self.ssh.connect(**kwargs)
+        self.sftp = self.ssh.open_sftp()
 
     def __del__(self):
         if hasattr(self, 'sftp'):
