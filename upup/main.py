@@ -108,6 +108,8 @@ class Uploader(object):
         self._exec(f'mkdir -p {self._escape(remote_dir_path)}')
 
         remote_file_path = os.path.join(remote_dir_path, os.path.basename(path))
+        if os.sep != '/':
+            remote_file_path = remote_file_path.replace(os.sep, '/')
         print(f'UPLOAD\t{path}\t->\t{remote_file_path}')
         self.sftp.put(path, remote_file_path)
 
@@ -115,6 +117,8 @@ class Uploader(object):
         for local_dir_path, _, filenames in os.walk(path):
             rel_dir_path = os.path.relpath(local_dir_path, self.local_dir)
             remote_dir_path = os.path.join(self.remote_dir, rel_dir_path) if rel_dir_path != '.' else self.remote_dir
+            if os.sep != '/':
+                remote_dir_path = remote_dir_path.replace(os.sep, '/')
             print(f'CREATE\t{remote_dir_path}')
             self._exec(f'mkdir -p {self._escape(remote_dir_path)}')
 
@@ -124,6 +128,8 @@ class Uploader(object):
                     print(f'IGNORE\t{local_file_path}')
                 else:
                     remote_file_path = os.path.join(remote_dir_path, filename)
+                    if os.sep != '/':
+                        remote_file_path = remote_file_path.replace(os.sep, '/')
                     print(f'UPLOAD\t{local_file_path}\t->\t{remote_file_path}')
                     self.sftp.put(local_file_path, remote_file_path)
 
