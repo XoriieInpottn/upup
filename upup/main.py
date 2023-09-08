@@ -8,6 +8,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 from typing import List
 
@@ -160,7 +161,7 @@ def upload(doc: dict, path_list: List[str]):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--server', '-s', type=int, help='The server index.')
+    parser.add_argument('--server', '-s', help='The server index.')
     parser.add_argument('input', nargs='+', help='The files or folders you want to upload.')
     args = parser.parse_args()
 
@@ -190,12 +191,14 @@ def main():
                 server = input('Select server: ')
                 print()
                 if server:
-                    upload(docs[int(server)], args.input)
+                    for server in re.split(r'[,\s]+', server):
+                        upload(docs[int(server)], args.input)
                 else:
                     for doc in docs:
                         upload(doc, args.input)
         else:
-            upload(docs[args.server], args.input)
+            for server in re.split(r'[,\s]+', args.server):
+                upload(docs[int(server)], args.input)
     elif isinstance(docs, dict):
         upload(docs, args.input)
     else:
